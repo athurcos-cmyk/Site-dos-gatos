@@ -2,487 +2,291 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Doce Aventura da Banana Fofa 🍌🧁</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projeto Saúde & Shape</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel para traduzir o JSX no navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
+        /* Personalizações extras */
         body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #FFF5F7; /* Rosa pastel bem clarinho */
-            font-family: 'Fredoka', sans-serif;
-            touch-action: none; /* Previne zoom no celular */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        #gameCanvas {
-            display: block;
-            width: 100%;
-            height: 100vh;
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
         }
-
-        /* Interface sobreposta */
-        .ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 20px;
-            box-sizing: border-box;
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-
-        .score-box {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 24px;
-            color: #FF6B6B;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
-            border: 2px solid #FFE4E1;
-            display: inline-block;
+        /* Animações suaves */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
         }
-
-        .hearts {
-            font-size: 30px;
-            letter-spacing: 5px;
-        }
-
-        /* Tela de Início e Game Over */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 245, 247, 0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: auto;
-            transition: opacity 0.3s;
-            z-index: 10;
-        }
-
-        .hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        h1 {
-            font-size: 4rem;
-            color: #FFB347; /* Laranja Banana */
-            text-shadow: 3px 3px 0px #FF6B6B;
-            margin-bottom: 10px;
-            text-align: center;
-            line-height: 1.1;
-        }
-
-        p {
-            font-size: 1.5rem;
-            color: #888;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        button {
-            background: linear-gradient(45deg, #FFB347, #FFCC33);
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            color: white;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: 'Fredoka', sans-serif;
-            font-weight: 600;
-            box-shadow: 0 10px 20px rgba(255, 179, 71, 0.4);
-            transition: transform 0.1s, box-shadow 0.1s;
-            animation: pulse 2s infinite;
-        }
-
-        button:active {
-            transform: scale(0.95);
-            box-shadow: 0 5px 10px rgba(255, 179, 71, 0.4);
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        /* Partículas de fundo para dar clima de doce */
-        .bg-pattern {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(#FFD1DC 2px, transparent 2px);
-            background-size: 30px 30px;
-            z-index: -1;
-            opacity: 0.5;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800">
+    <div id="root"></div>
 
-    <div class="bg-pattern"></div>
+    <script type="text/babel">
+        const { useState } = React;
 
-    <!-- Canvas do Jogo -->
-    <canvas id="gameCanvas"></canvas>
+        // --- Ícones SVG (Para não depender de imports externos) ---
+        const Icons = {
+            Heart: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+            Utensils: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>,
+            Dumbbell: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>,
+            Droplets: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.8-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>,
+            Info: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+            Flame: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
+            Activity: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            AlertCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        };
 
-    <!-- Interface durante o jogo -->
-    <div class="ui-layer" id="gameUI" style="display: none;">
-        <div class="flex justify-between w-full">
-            <div class="score-box">Doces: <span id="scoreVal">0</span></div>
-            <div class="hearts" id="livesVal">❤️❤️❤️</div>
-        </div>
-    </div>
-
-    <!-- Tela Inicial -->
-    <div class="screen" id="startScreen">
-        <h1>Banana<br>Doce & Fofa</h1>
-        <p>Ajude a Banana a pegar os docinhos!<br>Cuidado com os brócolis 🥦</p>
-        <button onclick="startGame()">Jogar Agora!</button>
-    </div>
-
-    <!-- Tela de Game Over -->
-    <div class="screen hidden" id="gameOverScreen">
-        <h1 style="color: #FF6B6B; text-shadow: none;">Poxa vida!</h1>
-        <p>Você pegou muitos brócolis.<br>Sua pontuação: <span id="finalScore" class="font-bold text-pink-500">0</span></p>
-        <button onclick="startGame()">Tentar de Novo</button>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Elementos da UI
-        const startScreen = document.getElementById('startScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const gameUI = document.getElementById('gameUI');
-        const scoreEl = document.getElementById('scoreVal');
-        const livesEl = document.getElementById('livesVal');
-        const finalScoreEl = document.getElementById('finalScore');
-
-        // Variáveis do Jogo
-        let gameRunning = false;
-        let score = 0;
-        let lives = 3;
-        let frameCount = 0;
-        let particles = [];
-        let items = [];
-        let difficulty = 1;
-
-        // Ajuste de tamanho
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // --- CLASSES ---
-
-        // O Jogador (A Banana Fofa)
-        class Player {
-            constructor() {
-                this.x = canvas.width / 2;
-                this.y = canvas.height - 100;
-                this.width = 60;
-                this.height = 80;
-                this.targetX = this.x;
-                this.angle = 0;
-                this.bounce = 0;
+        // --- Dados dos Treinos ---
+        const workouts = {
+            A: {
+                title: "Treino A: Inferiores (Quadríceps & Glúteo Geral)",
+                focus: "Foco em força e construção de coxa.",
+                exercises: [
+                    { name: "Agachamento Livre (ou Smith)", sets: "4", reps: "8 a 10", obs: "O rei dos exercícios. Desça com controle." },
+                    { name: "Leg Press 45º", sets: "3", reps: "10 a 12", obs: "Pés na largura do quadril. Não estique o joelho todo." },
+                    { name: "Afundo (ou Búlgaro)", sets: "3", reps: "10 cada perna", obs: "Incline levemente o tronco pra frente." },
+                    { name: "Cadeira Extensora", sets: "3", reps: "12 a 15", obs: "Segure 2 segundos com a perna esticada lá em cima." },
+                    { name: "Elevação de Panturrilha em pé", sets: "4", reps: "12 a 15", obs: "Amplitude máxima." }
+                ]
+            },
+            B: {
+                title: "Treino B: Superiores & Postura",
+                focus: "Desenhar ombros e costas para afinar a cintura visualmente.",
+                exercises: [
+                    { name: "Puxada Alta na Polia (Frente)", sets: "3", reps: "10 a 12", obs: "Traga a barra na direção do peito." },
+                    { name: "Remada Baixa (Triângulo)", sets: "3", reps: "12", obs: "Feche as escápulas (costas) ao puxar." },
+                    { name: "Desenvolvimento Halteres", sets: "3", reps: "10", obs: "Sentada. Cuidado para não arquear as costas." },
+                    { name: "Elevação Lateral", sets: "3", reps: "12 a 15", obs: "Foco no ombro, não suba demais o trapézio." },
+                    { name: "Tríceps Corda", sets: "3", reps: "12", obs: "Cotovelos colados no corpo." },
+                    { name: "Rosca Direta", sets: "3", reps: "12", obs: "Sem balançar o corpo." },
+                    { name: "Cardio Moderado", sets: "1", reps: "20 min", obs: "Caminhada rápida ou bike." }
+                ]
+            },
+            C: {
+                title: "Treino C: Posterior & Glúteo Isolado",
+                focus: "Foco na parte de trás da perna e 'bumbum na nuca'.",
+                exercises: [
+                    { name: "Elevação Pélvica", sets: "4", reps: "8 a 12", obs: "Carga alta. Contraia muito o glúteo no topo." },
+                    { name: "Stiff", sets: "3", reps: "10 a 12", obs: "Coluna reta sempre. Sinta alongar atrás da coxa." },
+                    { name: "Cadeira Flexora", sets: "3", reps: "12", obs: "Movimento controlado." },
+                    { name: "Cadeira Abdutora", sets: "3", reps: "15 a 20", obs: "Tronco inclinado para frente ajuda a pegar mais glúteo." },
+                    { name: "Panturrilha Sentada", sets: "3", reps: "15", obs: "Movimento completo." }
+                ]
+            },
+            D: {
+                title: "Treino D: Core (Abdômen) & Cardio Power",
+                focus: "Gasto calórico alto e fortalecimento.",
+                exercises: [
+                    { name: "Prancha Abdominal", sets: "3", reps: "45s a 1 min", obs: "Abdômen travado, não deixe o quadril cair." },
+                    { name: "Abdominal Infra", sets: "3", reps: "12 a 15", obs: "Elevação de pernas deitada ou pendurada." },
+                    { name: "Abdominal Supra", sets: "3", reps: "20", obs: "O básico curto. Solte o ar ao subir." },
+                    { name: "Cardio Intenso (Escada ou Esteira)", sets: "1", reps: "25 a 30 min", obs: "Ritmo constante e puxado. Vai suar!" }
+                ]
             }
+        };
 
-            update() {
-                // Movimento suave (Lerp)
-                this.x += (this.targetX - this.x) * 0.15;
-                
-                // Efeito de balanço ao mover
-                this.angle = (this.x - this.targetX) * 0.005;
-                
-                // Respiração/Pulo (Idle animation)
-                this.bounce = Math.sin(Date.now() / 150) * 5;
+        // --- Componente Principal ---
+        function FitnessPlan() {
+            const [activeTab, setActiveTab] = useState('A');
+            const [section, setSection] = useState('diet'); // 'diet' or 'workout'
 
-                // Limites da tela
-                if (this.x < 40) this.x = 40;
-                if (this.x > canvas.width - 40) this.x = canvas.width - 40;
-            }
+            return (
+                <div className="min-h-screen pb-20">
+                    {/* Header */}
+                    <header className="bg-rose-500 text-white p-6 shadow-lg sticky top-0 z-50">
+                        <div className="max-w-3xl mx-auto flex justify-between items-center">
+                            <div>
+                                <h1 className="text-2xl font-bold">Projeto Saúde & Shape</h1>
+                                <p className="text-rose-100 text-sm">Foco: 73kg → Recomposição Corporal</p>
+                            </div>
+                            <div className="w-8 h-8 text-white animate-pulse">
+                                <Icons.Heart />
+                            </div>
+                        </div>
+                    </header>
 
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y + this.bounce);
-                ctx.rotate(this.angle);
+                    {/* Navigation Toggle */}
+                    <div className="max-w-3xl mx-auto p-4 flex gap-2">
+                        <button 
+                            onClick={() => setSection('diet')}
+                            className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all ${
+                                section === 'diet' 
+                                ? 'bg-rose-500 text-white shadow-md' 
+                                : 'bg-white text-slate-500 border border-slate-200 hover:bg-rose-50'
+                            }`}
+                        >
+                            <div className="w-5 h-5"><Icons.Utensils /></div>
+                            Dieta & Dicas
+                        </button>
+                        <button 
+                            onClick={() => setSection('workout')}
+                            className={`flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all ${
+                                section === 'workout' 
+                                ? 'bg-rose-500 text-white shadow-md' 
+                                : 'bg-white text-slate-500 border border-slate-200 hover:bg-rose-50'
+                            }`}
+                        >
+                             <div className="w-5 h-5"><Icons.Dumbbell /></div>
+                            Treinos
+                        </button>
+                    </div>
 
-                // Desenhar a Banana
-                // Corpo
-                ctx.beginPath();
-                ctx.fillStyle = '#FFEB3B'; // Amarelo Banana
-                ctx.strokeStyle = '#FBC02D';
-                ctx.lineWidth = 3;
-                // Curva da banana
-                ctx.moveTo(-20, -40);
-                ctx.quadraticCurveTo(30, 0, -20, 40);
-                ctx.quadraticCurveTo(-50, 0, -20, -40);
-                ctx.fill();
-                ctx.stroke();
-                ctx.closePath();
-
-                // Cabinho da banana
-                ctx.beginPath();
-                ctx.fillStyle = '#8D6E63';
-                ctx.rect(-24, -48, 8, 10);
-                ctx.fill();
-
-                // Rosto Fofo (Kawaii)
-                // Olhos
-                ctx.fillStyle = '#3E2723';
-                ctx.beginPath();
-                ctx.arc(-15, -10, 3, 0, Math.PI * 2); // Olho esquerdo
-                ctx.arc(5, -10, 3, 0, Math.PI * 2); // Olho direito
-                ctx.fill();
-
-                // Bochechas (Essencial para ser fofo)
-                ctx.fillStyle = 'rgba(255, 105, 180, 0.5)';
-                ctx.beginPath();
-                ctx.arc(-22, -2, 6, 0, Math.PI * 2);
-                ctx.arc(12, -2, 6, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Boca Sorridente
-                ctx.strokeStyle = '#3E2723';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(-5, -2, 5, 0.2, Math.PI - 0.2);
-                ctx.stroke();
-
-                ctx.restore();
-            }
-        }
-
-        // Itens que caem (Doces e Brócolis)
-        class Item {
-            constructor() {
-                this.x = Math.random() * (canvas.width - 60) + 30;
-                this.y = -50;
-                this.speed = (Math.random() * 2 + 3) * difficulty;
-                this.size = 40;
-                this.rotation = 0;
-                this.rotSpeed = (Math.random() - 0.5) * 0.1;
-                
-                // Tipos de itens
-                const rand = Math.random();
-                if (rand < 0.15) {
-                    this.type = 'bad'; // 15% de chance de ser brócolis
-                    this.emoji = '🥦';
-                } else if (rand < 0.2) {
-                    this.type = 'gold'; // 5% de chance de ser banana dourada
-                    this.emoji = '🍌';
-                    this.speed *= 1.5;
-                } else {
-                    this.type = 'good';
-                    // Lista de doces
-                    const sweets = ['🍩', '🧁', '🍭', '🍬', '🍰', '🍪', '🍫', '🍦'];
-                    this.emoji = sweets[Math.floor(Math.random() * sweets.length)];
-                }
-            }
-
-            update() {
-                this.y += this.speed;
-                this.rotation += this.rotSpeed;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.font = "40px Arial";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                
-                // Sombra fofa
-                ctx.shadowColor = "rgba(0,0,0,0.1)";
-                ctx.shadowBlur = 5;
-                ctx.shadowOffsetY = 5;
-                
-                ctx.fillText(this.emoji, 0, 0);
-                
-                // Brilho se for ouro
-                if (this.type === 'gold') {
-                    ctx.shadowColor = "gold";
-                    ctx.shadowBlur = 20;
-                    ctx.fillText('✨', 15, -15);
-                }
-                
-                ctx.restore();
-            }
-        }
-
-        // Partículas de explosão (Confete)
-        class Particle {
-            constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                this.vx = (Math.random() - 0.5) * 10;
-                this.vy = (Math.random() - 0.5) * 10;
-                this.life = 1; // Opacidade
-                this.color = color;
-                this.size = Math.random() * 5 + 2;
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += 0.2; // Gravidade
-                this.life -= 0.02;
-            }
-
-            draw() {
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            }
-        }
-
-        // --- LÓGICA DO JOGO ---
-
-        const player = new Player();
-
-        // Input (Mouse e Touch)
-        function handleInput(e) {
-            let clientX;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-            } else {
-                clientX = e.clientX;
-            }
-            player.targetX = clientX;
-        }
-
-        window.addEventListener('mousemove', handleInput);
-        window.addEventListener('touchmove', handleInput);
-
-        function createExplosion(x, y, type) {
-            let colors = ['#FF69B4', '#FFFACD', '#87CEEB', '#FFD1DC'];
-            if (type === 'bad') colors = ['#4CAF50', '#2E7D32']; // Verde feio
-            if (type === 'gold') colors = ['#FFD700', '#FFF']; // Dourado
-            
-            for (let i = 0; i < 15; i++) {
-                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
-            }
-        }
-
-        function startGame() {
-            score = 0;
-            lives = 3;
-            difficulty = 1;
-            items = [];
-            particles = [];
-            gameRunning = true;
-            scoreEl.innerText = score;
-            livesEl.innerText = "❤️❤️❤️";
-            
-            startScreen.classList.add('hidden');
-            gameOverScreen.classList.add('hidden');
-            gameUI.style.display = 'flex';
-
-            animate();
-        }
-
-        function gameOver() {
-            gameRunning = false;
-            gameUI.style.display = 'none';
-            gameOverScreen.classList.remove('hidden');
-            finalScoreEl.innerText = score;
-        }
-
-        function animate() {
-            if (!gameRunning) return;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            frameCount++;
-
-            // Gerar itens
-            // Diminui o intervalo conforme a dificuldade aumenta
-            let spawnRate = Math.max(20, 60 - Math.floor(score / 5));
-            if (frameCount % spawnRate === 0) {
-                items.push(new Item());
-            }
-
-            // Aumentar dificuldade suavemente
-            difficulty = 1 + (score * 0.01);
-
-            // Atualizar Jogador
-            player.update();
-            player.draw();
-
-            // Atualizar Itens
-            for (let i = items.length - 1; i >= 0; i--) {
-                let item = items[i];
-                item.update();
-                item.draw();
-
-                // Colisão simples (Distância)
-                const dx = item.x - player.x;
-                const dy = item.y - (player.y - 20); // Centro aproximado da banana
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 60) {
-                    // Pegou!
-                    if (item.type === 'bad') {
-                        createExplosion(item.x, item.y, 'bad');
-                        lives--;
-                        // Atualizar corações
-                        livesEl.innerText = "❤️".repeat(lives) + "🤍".repeat(3 - lives);
-                        // Tremor na tela (opcional)
-                        canvas.style.transform = "translate(5px, 5px)";
-                        setTimeout(() => canvas.style.transform = "none", 100);
+                    <main className="max-w-3xl mx-auto p-4">
                         
-                        if (lives <= 0) {
-                            gameOver();
-                        }
-                    } else {
-                        createExplosion(item.x, item.y, item.type);
-                        let points = item.type === 'gold' ? 5 : 1;
-                        score += points;
-                        scoreEl.innerText = score;
-                        
-                        // Efeito visual de pontuação flutuante (simplificado aqui)
-                    }
-                    items.splice(i, 1);
-                } else if (item.y > canvas.height) {
-                    // Passou da tela
-                    items.splice(i, 1);
-                }
-            }
+                        {/* SECTION: DIET */}
+                        {section === 'diet' && (
+                            <div className="space-y-6 fade-in">
+                                
+                                {/* Card Principal da Dieta */}
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                                    <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                        <div className="text-rose-500 w-6 h-6"><Icons.Info /></div>
+                                        A Regra do Prato
+                                    </h2>
+                                    <p className="text-slate-600 mb-6">
+                                        Como você não vai usar balança, use seus olhos e suas mãos para medir.
+                                    </p>
 
-            // Atualizar Partículas
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.update();
-                p.draw();
-                if (p.life <= 0) particles.splice(i, 1);
-            }
+                                    <div className="space-y-4">
+                                        <div className="flex items-start gap-4 p-4 bg-green-50 rounded-xl border border-green-100">
+                                            <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center text-green-700 font-bold shrink-0 text-lg">50%</div>
+                                            <div>
+                                                <h3 className="font-bold text-green-800">Vegetais e Salada</h3>
+                                                <p className="text-sm text-green-700">Metade do prato. Brócolis, cenoura, alface, abobrinha. Coma isso PRIMEIRO.</p>
+                                            </div>
+                                        </div>
 
-            requestAnimationFrame(animate);
+                                        <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                                            <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 font-bold shrink-0 text-lg">25%</div>
+                                            <div>
+                                                <h3 className="font-bold text-blue-800">Proteína (Carne/Ovo)</h3>
+                                                <p className="text-sm text-blue-700">Tamanho da sua <strong>palma da mão aberta</strong>. Frango, carne moída, 2 ovos.</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                                            <div className="w-12 h-12 bg-amber-200 rounded-full flex items-center justify-center text-amber-700 font-bold shrink-0 text-lg">25%</div>
+                                            <div>
+                                                <h3 className="font-bold text-amber-800">Carboidratos</h3>
+                                                <p className="text-sm text-amber-700">Tamanho da sua <strong>mão fechada</strong>. Arroz, feijão, batata ou macarrão.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Dicas Rápidas */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-white p-5 rounded-xl shadow-sm border-l-4 border-rose-400">
+                                        <h3 className="font-bold flex items-center gap-2 mb-2 text-slate-800">
+                                            <div className="text-rose-500 w-5 h-5"><Icons.Activity /></div> Ordem Mágica
+                                        </h3>
+                                        <p className="text-sm text-slate-600">
+                                            1º Proteína <br/> 
+                                            2º Vegetais <br/> 
+                                            3º Carboidrato (Arroz/Massa) <br/>
+                                            <span className="text-xs text-slate-400 italic">Isso diminui a fome e ajuda a não estocar gordura.</span>
+                                        </p>
+                                    </div>
+                                    <div className="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-400">
+                                        <h3 className="font-bold flex items-center gap-2 mb-2 text-slate-800">
+                                            <div className="text-blue-500 w-5 h-5"><Icons.Droplets /></div> Hidratação
+                                        </h3>
+                                        <p className="text-sm text-slate-600">
+                                            Meta: <strong>2.5L a 3L por dia.</strong><br/>
+                                            Músculo desidratado não cresce. Leve garrafinha para a escola.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-rose-50 p-5 rounded-xl border border-rose-100">
+                                    <h3 className="font-bold text-rose-800 flex items-center gap-2 mb-2">
+                                        <div className="w-5 h-5"><Icons.AlertCircle /></div> Na Escola & Sem Whey
+                                    </h3>
+                                    <ul className="list-disc list-inside text-sm text-rose-900 space-y-2">
+                                        <li><strong>Sem Whey?</strong> Use Ovos! Comer 2 ovos cozidos de tarde ou no café é excelente.</li>
+                                        <li><strong>Almoço da Escola:</strong> Se tiver macarrão com carne, tente pegar o dobro de carne e metade do macarrão.</li>
+                                        <li><strong>Bebidas:</strong> Evite sucos (calorias vazias). Beba água.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* SECTION: WORKOUT */}
+                        {section === 'workout' && (
+                            <div className="fade-in">
+                                
+                                {/* Tab Selection */}
+                                <div className="flex overflow-x-auto gap-2 mb-6 pb-2 scrollbar-hide">
+                                    {Object.keys(workouts).map((key) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setActiveTab(key)}
+                                            className={`px-6 py-2 rounded-full font-bold whitespace-nowrap transition-colors ${
+                                                activeTab === key 
+                                                ? 'bg-slate-800 text-white shadow-lg' 
+                                                : 'bg-white text-slate-400 border border-slate-200'
+                                            }`}
+                                        >
+                                            Treino {key}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Active Workout Card */}
+                                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                                    <div className="bg-slate-800 text-white p-6">
+                                        <h2 className="text-2xl font-bold mb-1">{workouts[activeTab].title}</h2>
+                                        <p className="text-slate-300 text-sm flex items-center gap-2">
+                                            <div className="text-rose-400 w-4 h-4"><Icons.Flame /></div>
+                                            {workouts[activeTab].focus}
+                                        </p>
+                                    </div>
+
+                                    <div className="p-4 divide-y divide-slate-100">
+                                        {workouts[activeTab].exercises.map((exercise, idx) => (
+                                            <div key={idx} className="py-4 first:pt-0 last:pb-0">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <h3 className="font-bold text-slate-800 text-lg">{exercise.name}</h3>
+                                                    <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                                                        {exercise.sets} x {exercise.reps}
+                                                    </span>
+                                                </div>
+                                                <p className="text-slate-500 text-sm flex items-start gap-2">
+                                                    <span className="mt-1 w-1.5 h-1.5 bg-rose-400 rounded-full shrink-0"></span>
+                                                    {exercise.obs}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
         }
 
-        // Iniciar desenho inicial (fundo)
-        ctx.fillStyle = '#FFF5F7';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<FitnessPlan />);
     </script>
 </body>
 </html>
