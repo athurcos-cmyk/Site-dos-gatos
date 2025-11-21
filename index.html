@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projeto Saúde & Shape - Sophya</title>
     
-    <!-- Tailwind CSS -->
+    <link rel="manifest" href="/manifest.json">
+
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel para traduzir o JSX no navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
@@ -450,6 +449,20 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<FitnessPlan />);
+    </script>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js') // sw.js é o nome do arquivo Service Worker
+                    .then(reg => {
+                        console.log('Service Worker registrado com sucesso:', reg.scope);
+                    })
+                    .catch(err => {
+                        console.error('Falha no registro do Service Worker:', err);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
