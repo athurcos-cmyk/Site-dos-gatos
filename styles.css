@@ -1,5 +1,5 @@
-/* Importação do Tailwind (mantendo o uso da CDN para simplicidade) 
-   Em um projeto real, você rodaria o PostCSS para gerar um styles.css completo */
+/* Importação do Tailwind (mantendo o uso da CDN para simplicidade) */
+/* Isso garante que as classes Tailwind sejam carregadas e aplicadas */
 @import url('https://cdn.tailwindcss.com');
 
 /* Personalizações extras (movidas do index.html) */
@@ -30,11 +30,10 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
 }
 
-/* * Acessibilidade e Melhoria de Foco
- * Adiciona um anel de foco visualmente agradável, mas não intrusivo.
- */
+/* Acessibilidade e Melhoria de Foco (A11Y) */
+/* Adiciona um anel de foco visualmente agradável para navegação por teclado */
 button:focus-visible, a:focus-visible, input:focus-visible {
     outline: 2px solid #F43F5E; /* rose-500 */
     outline-offset: 3px;
-    border-radius: 4px; /* Ajuste para coincidir com o arredondamento dos elementos */
+    border-radius: 4px; 
 }
