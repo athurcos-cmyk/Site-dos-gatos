@@ -1,5 +1,4 @@
 /* Importação do Tailwind (mantendo o uso da CDN para simplicidade) */
-/* Isso garante que as classes Tailwind sejam carregadas e aplicadas */
 @import url('https://cdn.tailwindcss.com');
 
 /* Personalizações extras (movidas do index.html) */
@@ -31,7 +30,6 @@ body {
 }
 
 /* Acessibilidade e Melhoria de Foco (A11Y) */
-/* Adiciona um anel de foco visualmente agradável para navegação por teclado */
 button:focus-visible, a:focus-visible, input:focus-visible {
     outline: 2px solid #F43F5E; /* rose-500 */
     outline-offset: 3px;
