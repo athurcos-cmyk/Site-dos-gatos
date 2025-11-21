@@ -24,7 +24,6 @@ self.addEventListener('install', event => {
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('Service Worker: Cache aberto e arquivos adicionados.');
-                // Tenta adicionar todos os recursos, mesmo que falhe em alguns (como o ícone de CDN)
                 return Promise.all(
                     urlsToCache.map(url => {
                         return cache.add(url).catch(err => {
@@ -56,9 +55,8 @@ self.addEventListener('activate', event => {
     );
 });
 
-// 3. Busca (Fetch): Estratégia Cache-First (Tenta o Cache, se falhar, vai para a Rede)
+// 3. Busca (Fetch): Estratégia Cache-First
 self.addEventListener('fetch', event => {
-    // Intercepta todas as requisições, incluindo as CDNs (que devem estar no cache)
     event.respondWith(
         caches.match(event.request)
             .then(response => {
@@ -70,7 +68,6 @@ self.addEventListener('fetch', event => {
                 // Caso contrário, busca na rede
                 return fetch(event.request).catch(error => {
                     console.log('Falha na rede e não encontrado no cache:', event.request.url, error);
-                    // Opcional: Aqui você pode retornar um fallback (ex: imagem offline)
                 });
             })
     );
