@@ -1,14 +1,20 @@
 {
-  "name": "App  Sophya",
+  "name": "Projeto Saúde & Shape - Sophya",
   "short_name": "Treino Sophya",
+  "description": "Plano de treino e dieta personalizado para Sophya, acessível offline.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#09090b",
+  "background_color": "#ffffff",
+  "theme_color": "#F43F5E",
   "icons": [
     {
       "src": "https://i.imgur.com/mP04ist.jpeg",
       "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://i.imgur.com/mP04ist.jpeg",
+      "sizes": "512x512",
       "type": "image/jpeg"
     }
   ]
