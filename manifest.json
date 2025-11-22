@@ -1,10 +1,9 @@
 {
-  "name": "Projeto Saúde & Shape - Sophya",
+  "name": "Projeto Saúde & Shape",
   "short_name": "Treino Sophya",
-  "description": "Plano de treino e dieta personalizado para Sophya, acessível offline.",
   "start_url": "./index.html",
-  "display": "fullscreen", 
-  "background_color": "#ffffff",
+  "display": "standalone",
+  "background_color": "#F43F5E",
   "theme_color": "#F43F5E",
   "icons": [
     {
