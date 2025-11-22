@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sophya-pwa-v3'; // Versão atualizada para forçar o recache e garantir offline total
+const CACHE_NAME = 'sophya-pwa-v4'; // Aumentei a versão para forçar o recache
 const BASE_URL = self.location.origin;
 
 // Lista de arquivos que DEVEM ser cacheados (Incluindo CDNs para funcionar OFFLINE)
@@ -13,7 +13,7 @@ const urlsToCache = [
     'https://unpkg.com/react@18/umd/react.production.min.js',
     'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
     'https://unpkg.com/@babel/standalone/babel.min.js',
-    // Ícone (Se o link do Imgur for estável)
+    // Ícone 
     'https://i.imgur.com/mP04ist.jpeg' 
 ];
 
