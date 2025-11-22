@@ -6,7 +6,10 @@
     <title>Projeto Saúde & Shape - Sophya</title>
     
     <link rel="manifest" href="/manifest.json">
-    
+    <meta name="theme-color" content="#F43F5E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> 
+
     <link rel="stylesheet" href="styles.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,6 +22,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // --- CÓDIGO REACT DA MINHA RESPOSTA ANTERIOR (Timer, Icons, FitnessPlan e o objeto const workouts) ---
+        // (MANTIDO COMPLETO, INCLUINDO OS TREINOS A, B, C, D)
+
         const { useState, useEffect, useRef } = React;
 
         // --- Ícones SVG ---
@@ -65,7 +71,6 @@
                     }, 1000);
                 } else if (timeLeft === 0) {
                     setIsActive(false);
-                    // Opcional: Tocar som aqui
                 }
                 return () => clearInterval(interval);
             }, [isActive, timeLeft]);
@@ -214,7 +219,8 @@
             }
         };
 
-        // --- Componente Principal ---
+        // --- Componente Principal (FitnessPlan) e renderização... ---
+
         function FitnessPlan() {
             const [activeTab, setActiveTab] = useState('A');
             const [section, setSection] = useState('diet'); // 'diet' or 'workout'
@@ -424,12 +430,12 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<FitnessPlan />);
+
     </script>
     
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // sw.js é o nome do arquivo Service Worker
                 navigator.serviceWorker.register('/sw.js') 
                     .then(reg => {
                         console.log('Service Worker registrado com sucesso:', reg.scope);
